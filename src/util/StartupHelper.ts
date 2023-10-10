@@ -1,17 +1,15 @@
 import { StartupInfo } from "../data/StartupInfo";
 
 export function createStartupInfoFromEnvironment(): StartupInfo {
-    const discordToken = getEnvironmentVariable("DISCORD_TOKEN");
-
     return {
-        discordToken
+        discordToken: getEnvironmentVariable("DISCORD_TOKEN")
     };
 }
 
 function getEnvironmentVariable(name: string): string {
     const value = process.env[name];
     if (!value) {
-        throw new Error(`Environment variable ${name} is not set!`);
+        throw new Error(`Environment variable '${name}' is not set!`);
     }
     return value;
 }
