@@ -2,8 +2,7 @@
 import 'dotenv/config';
 
 // Imports
-import { IntentsBitField } from "discord.js";
-import { Client } from "discordx";
+import { Client, IntentsBitField } from "discord.js";
 import { createStartupInfoFromEnvironment } from "./util/StartupHelper";
 
 const startup = createStartupInfoFromEnvironment();
