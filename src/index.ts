@@ -19,7 +19,6 @@ const client = new Client({
 });
 
 const commandHandler = new CommandHandler(logger.child({ component: "CommandHandler" }));
-commandHandler.registerCommands();
 commandHandler.subscribeEvents(client);
 
 client.on("ready", (client) => {

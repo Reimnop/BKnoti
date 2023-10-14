@@ -5,25 +5,23 @@ import { PingCommand } from "./command/Ping";
 
 export class CommandHandler {
     private readonly logger: Logger;
-    private commandRegistry: CommandRegistry | null = null;
+    private readonly commandRegistry: CommandRegistry;
 
     constructor(logger: Logger) {
         this.logger = logger;
+        this.commandRegistry = this.registerCommands();
     }
 
-    public registerCommands(): void {
-        const registry = new CommandRegistry();
-        registry.registerCommand("ping", () => new PingCommand());
-
-        registry.lock();
-        this.commandRegistry = registry;
+    private registerCommands(): CommandRegistry {
+        const registry = new CommandRegistry()
+            .registerCommand("ping", () => new PingCommand())
+            .lock();
+            
+        return registry;
     }
 
     public subscribeEvents(client: Client): void {
         client.on("ready", () => {
-            if (!this.commandRegistry)
-                throw new Error("Command registry is not initialized!");
-
             const commands = [...CommandHandler.iterateCommandData(this.commandRegistry)];
             const application = client.application;
             if (!application)
