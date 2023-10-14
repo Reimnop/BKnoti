@@ -1,12 +1,15 @@
 import { Command } from "../Command";
-import { Interaction } from "discord.js";
+import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
 
 export class PingCommand implements Command {
-    getDescription(): string {
-        return "Pings the bot.";
-    }
+    public readonly description: string = "Replies with 'Pong!'";
 
-    async execute(interaction: Interaction): Promise<void> {
-        await interaction.reply("Pong!");
+    async execute(interaction: ChatInputCommandInteraction): Promise<void> {
+        const client = interaction.client;
+        const replyOptions: InteractionReplyOptions = {
+            ephemeral: true,
+            content: `Pong! Latency: ${client.ws.ping}ms`
+        }
+        await interaction.reply(replyOptions);
     }
 }

@@ -1,6 +1,6 @@
-import { Interaction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 
 export interface Command {
-    getDescription(): string;
-    execute(interaction: Interaction): Promise<void>;
+    description: string;
+    execute(interaction: ChatInputCommandInteraction): Promise<void>;
 }
