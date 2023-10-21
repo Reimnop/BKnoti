@@ -22,6 +22,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@googleapis/calendar": "^9.3.2",
     "discord.js": "^14.13.0",
     "dotenv": "^16.3.1",
     "pino": "^8.16.0"

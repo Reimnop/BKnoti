@@ -1,7 +1,7 @@
-import { type Command } from "../Command";
-import { type ChatInputCommandInteraction, type InteractionReplyOptions } from "discord.js";
+import { Command } from "../Command";
+import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
 
-export class PingCommand implements Command {
+export class Ping implements Command {
     public readonly description: string = "Replies with 'Pong!'";
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {

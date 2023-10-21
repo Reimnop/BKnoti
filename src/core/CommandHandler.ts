@@ -1,7 +1,8 @@
 import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import { Logger } from "pino";
 import { CommandRegistry } from "./CommandRegistry";
-import { PingCommand } from "./command/Ping";
+import { Ping } from "./command/Ping";
+import { Calendar } from "./command/Calendar";
 
 export class CommandHandler {
     private readonly logger: Logger;
@@ -14,7 +15,8 @@ export class CommandHandler {
 
     private registerCommands(): CommandRegistry {
         const registry = new CommandRegistry()
-            .registerCommand("ping", () => new PingCommand())
+            .registerCommand("ping", () => new Ping())
+            .registerCommand("calendar", () => new Calendar())
             .lock();
             
         return registry;
@@ -29,7 +31,7 @@ export class CommandHandler {
             
             application.commands.set(commands);
 
-            this.logger.info(`Registered ${this.commandRegistry.count()} slash commands.`);
+            this.logger.info(`Registered ${this.commandRegistry.count()} slash commands`);
         });
 
         client.on("interactionCreate", async (interaction) => {
