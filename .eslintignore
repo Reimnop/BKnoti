@@ -1,0 +1,10 @@
+# Ignore all files in the root except for src
+/*
+!src
+
+# Ignore all files in the src folder except .ts
+src/*
+!src/**/*.ts
+
+# Ignore build output
+build
