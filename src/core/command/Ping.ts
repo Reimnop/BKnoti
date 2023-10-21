@@ -1,5 +1,5 @@
-import { Command } from "../Command";
-import { ChatInputCommandInteraction, InteractionReplyOptions } from "discord.js";
+import { type Command } from "../Command";
+import { type ChatInputCommandInteraction, type InteractionReplyOptions } from "discord.js";
 
 export class PingCommand implements Command {
     public readonly description: string = "Replies with 'Pong!'";
@@ -9,7 +9,7 @@ export class PingCommand implements Command {
         const replyOptions: InteractionReplyOptions = {
             ephemeral: true,
             content: `Pong! Latency: ${client.ws.ping}ms`
-        }
+        };
         await interaction.reply(replyOptions);
     }
 }

@@ -25,7 +25,7 @@ export class CommandRegistry implements Iterable<[string, Command]> {
         return this.commands.get(name);
     }
 
-    [Symbol.iterator](): Iterator<[string, Command], any, undefined> {
+    [Symbol.iterator](): Iterator<[string, Command]> {
         return this.commands.entries();   
     }
 

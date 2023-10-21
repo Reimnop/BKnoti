@@ -1,0 +1,5 @@
+# Prettier ignores these
+
+# Ignore all files in the root except for src
+/*
+!src
