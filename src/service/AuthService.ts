@@ -1,6 +1,6 @@
 import { StartupInfo } from "../data";
 import { google } from "googleapis";
-import { decodeBase64, encodeBase64 } from "../util/EncodingHelper";
+import { decodeBase64, encodeBase64 } from "../util";
 import express, { Express } from "express";
 import { Logger } from "pino";
 
