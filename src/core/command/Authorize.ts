@@ -1,30 +1,18 @@
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
-import { Command } from "../Command";
-import { StartupInfo } from "../../data/StartupInfo";
-import { google } from "googleapis";
+import { Command } from "..";
+import { AuthService } from "../../service";
 
 export class Authorize implements Command {
     public readonly description: string = "Authorize a user to use the bot";
 
-    private readonly startupInfo: StartupInfo;
+    private readonly authService: AuthService;
     
-    constructor(startupInfo: StartupInfo) {
-        this.startupInfo = startupInfo;
+    constructor(authService: AuthService) {
+        this.authService = authService;
     }
 
     async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
-        const oauth2Client = new google.auth.OAuth2(
-            this.startupInfo.googleApiClientId,
-            this.startupInfo.googleApiClientSecret,
-            this.startupInfo.googleApiRedirectUri
-        );
-        const scopes = [
-            "https://www.googleapis.com/auth/calendar.readonly"
-        ];
-        const url = oauth2Client.generateAuthUrl({
-            access_type: "online",
-            scope: scopes
-        });
+        const url = this.authService.getAuthUrl(interaction.user.id);
         await interaction.reply({
             ephemeral: true,
             content: `Please visit [this link](${url}) to authorize me.`

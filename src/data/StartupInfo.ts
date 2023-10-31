@@ -3,4 +3,5 @@ export interface StartupInfo {
     googleApiClientId: string;
     googleApiClientSecret: string;
     googleApiRedirectUri: string;
+    redirectPort: number;
 }

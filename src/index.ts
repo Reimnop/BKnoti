@@ -3,10 +3,14 @@ import "dotenv/config";
 
 // Imports
 import { Client, IntentsBitField } from "discord.js";
-import { createStartupInfoFromEnvironment } from "./util/StartupHelper";
 import { pino } from "pino";
 import pretty from "pino-pretty";
-import { CommandHandler } from "./core/CommandHandler";
+import { createStartupInfoFromEnvironment } from "./util";
+import { CommandHandler } from "./core";
+
+// Commands
+import { Ping, Authorize } from "./core/command";
+import { AuthService } from "./service";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -18,7 +22,13 @@ const client = new Client({
     ]
 });
 
-const commandHandler = new CommandHandler(startup, logger.child({ component: "CommandHandler" }));
+const authService = new AuthService(startup);
+const commandHandler = new CommandHandler(
+    logger.child({ component: "CommandHandler" }),
+    function* () {
+        yield ["ping", () => new Ping()];
+        yield ["authorize", () => new Authorize(authService)];
+    });
 commandHandler.subscribeEvents(client);
 
 client.on("ready", (client) => {

@@ -1,26 +1,22 @@
 import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import { Logger } from "pino";
 import { CommandRegistry } from "./CommandRegistry";
-import { Ping } from "./command/Ping";
-import { Authorize } from "./command/Authorize";
-import { StartupInfo } from "../data/StartupInfo";
+import { Func } from "../util";
+import { Command } from "./Command";
+
+export type CommandRegisterCallback = () => Iterable<[string, Func<Command>]>;
 
 export class CommandHandler {
     private readonly logger: Logger;
     private readonly commandRegistry: CommandRegistry;
 
-    constructor(startupInfo: StartupInfo, logger: Logger) {
+    constructor(logger: Logger, registerCallback: CommandRegisterCallback) {
         this.logger = logger;
-        this.commandRegistry = this.registerCommands(startupInfo);
-    }
-
-    private registerCommands(startupInfo: StartupInfo): CommandRegistry {
-        const registry = new CommandRegistry()
-            .registerCommand("ping", () => new Ping())
-            .registerCommand("authorize", () => new Authorize(startupInfo))
-            .lock();
-            
-        return registry;
+        this.commandRegistry = new CommandRegistry();
+        for (const [name, func] of registerCallback()) {
+            this.commandRegistry.registerCommand(name, func);
+        }
+        this.commandRegistry.lock();
     }
 
     public subscribeEvents(client: Client): void {

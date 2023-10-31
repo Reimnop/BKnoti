@@ -1,4 +1,4 @@
-import { Func } from "../util/Functional";
+import { Func } from "../util";
 import { Command } from "./Command";
 
 export class CommandRegistry implements Iterable<[string, Command]> {
