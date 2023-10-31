@@ -2,7 +2,10 @@ import { StartupInfo } from "../data/StartupInfo";
 
 export function createStartupInfoFromEnvironment(): StartupInfo {
     return {
-        discordToken: getEnvironmentVariable("DISCORD_TOKEN")
+        discordToken: getEnvironmentVariable("DISCORD_TOKEN"),
+        googleApiClientId: getEnvironmentVariable("GAPI_CLIENT_ID"),
+        googleApiClientSecret: getEnvironmentVariable("GAPI_CLIENT_SECRET"),
+        googleApiRedirectUri: getEnvironmentVariable("GAPI_REDIRECT_URI")
     };
 }
 

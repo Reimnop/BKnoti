@@ -9,7 +9,7 @@ export class PingCommand implements Command {
         const replyOptions: InteractionReplyOptions = {
             ephemeral: true,
             content: `Pong! Latency: ${client.ws.ping}ms`
-        }
+        };
         await interaction.reply(replyOptions);
     }
 }

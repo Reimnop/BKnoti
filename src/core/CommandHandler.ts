@@ -2,19 +2,22 @@ import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPICh
 import { Logger } from "pino";
 import { CommandRegistry } from "./CommandRegistry";
 import { PingCommand } from "./command/Ping";
+import { Authorize } from "./command/Authorize";
+import { StartupInfo } from "../data/StartupInfo";
 
 export class CommandHandler {
     private readonly logger: Logger;
     private readonly commandRegistry: CommandRegistry;
 
-    constructor(logger: Logger) {
+    constructor(startupInfo: StartupInfo, logger: Logger) {
         this.logger = logger;
-        this.commandRegistry = this.registerCommands();
+        this.commandRegistry = this.registerCommands(startupInfo);
     }
 
-    private registerCommands(): CommandRegistry {
+    private registerCommands(startupInfo: StartupInfo): CommandRegistry {
         const registry = new CommandRegistry()
             .registerCommand("ping", () => new PingCommand())
+            .registerCommand("authorize", () => new Authorize(startupInfo))
             .lock();
             
         return registry;

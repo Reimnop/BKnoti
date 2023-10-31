@@ -18,7 +18,7 @@ const client = new Client({
     ]
 });
 
-const commandHandler = new CommandHandler(logger.child({ component: "CommandHandler" }));
+const commandHandler = new CommandHandler(startup, logger.child({ component: "CommandHandler" }));
 commandHandler.subscribeEvents(client);
 
 client.on("ready", (client) => {
