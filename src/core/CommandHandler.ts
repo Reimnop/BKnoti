@@ -1,7 +1,7 @@
 import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody } from "discord.js";
 import { Logger } from "pino";
 import { CommandRegistry } from "./CommandRegistry";
-import { PingCommand } from "./command/Ping";
+import { Ping } from "./command/Ping";
 import { Authorize } from "./command/Authorize";
 import { StartupInfo } from "../data/StartupInfo";
 
@@ -16,7 +16,7 @@ export class CommandHandler {
 
     private registerCommands(startupInfo: StartupInfo): CommandRegistry {
         const registry = new CommandRegistry()
-            .registerCommand("ping", () => new PingCommand())
+            .registerCommand("ping", () => new Ping())
             .registerCommand("authorize", () => new Authorize(startupInfo))
             .lock();
             
@@ -32,7 +32,7 @@ export class CommandHandler {
             
             application.commands.set(commands);
 
-            this.logger.info(`Registered ${this.commandRegistry.count()} slash commands.`);
+            this.logger.info(`Registered ${this.commandRegistry.count()} slash commands`);
         });
 
         client.on("interactionCreate", async (interaction) => {

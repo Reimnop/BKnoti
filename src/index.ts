@@ -1,12 +1,12 @@
 // Startup
-import 'dotenv/config';
+import "dotenv/config";
 
 // Imports
 import { Client, IntentsBitField } from "discord.js";
 import { createStartupInfoFromEnvironment } from "./util/StartupHelper";
 import { pino } from "pino";
 import pretty from "pino-pretty";
-import { CommandHandler } from './core/CommandHandler';
+import { CommandHandler } from "./core/CommandHandler";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
