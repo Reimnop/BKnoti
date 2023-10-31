@@ -1,13 +1,16 @@
 import { StartupInfo } from "../data";
 import { google } from "googleapis";
-import { encodeBase64 } from "../util/EncodingHelper";
+import { decodeBase64, encodeBase64 } from "../util/EncodingHelper";
 import express, { Express } from "express";
+import { Logger } from "pino";
 
 export class AuthService {
+    private readonly logger: Logger;
     private readonly startupInfo: StartupInfo;
     private readonly expressApp: Express;
 
-    constructor(startupInfo: StartupInfo) {
+    constructor(logger: Logger, startupInfo: StartupInfo) {
+        this.logger = logger;
         this.startupInfo = startupInfo;
 
         // Start express server
@@ -21,9 +24,12 @@ export class AuthService {
             const queries = request.query;
             const state = queries.state;
             const code = queries.code;
-
             if (state && code) {
-                console.log(queries);
+                const stateObject = decodeBase64(state as string) as { userId: string };
+                const codeString = code as string;
+
+                this.logger.debug(`Received code ${codeString} for user ${stateObject.userId}`);
+
                 response.sendFile("assets/success.html", {
                     root: process.cwd()
                 });

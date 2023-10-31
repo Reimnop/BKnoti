@@ -22,7 +22,7 @@ const client = new Client({
     ]
 });
 
-const authService = new AuthService(startup);
+const authService = new AuthService(logger.child({ component: "AuthService" }), startup);
 const commandHandler = new CommandHandler(
     logger.child({ component: "CommandHandler" }),
     function* () {
