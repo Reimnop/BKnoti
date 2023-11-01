@@ -1,8 +1,9 @@
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { Command } from "..";
 import { AuthService } from "../../service";
+import moment from "moment";
 
-export class Authorize implements Command {
+export class SetSchedule implements Command {
     private readonly authService: AuthService;
     
     constructor(authService: AuthService) {
@@ -17,4 +18,10 @@ export class Authorize implements Command {
         });
     }
 
+
+    // private calculateCycles(): number {
+    //     const time = moment.duration("08:00:00");
+    //     const date = moment().add(time);
+    //     
+    // }
 }

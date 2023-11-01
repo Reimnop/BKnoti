@@ -1,32 +1,164 @@
-import { Func } from "../util";
+import { CommandRegistration, SlashCommandRegistration, SubcommandGroupRegistration, SubcommandRegistration } from ".";
+import { RuntimeType } from "../util";
 import { Command } from "./Command";
 
-export class CommandRegistry implements Iterable<[string, Command]> {
-    private readonly commands: Map<string, Command> = new Map<string, Command>();
+export interface CommandNode extends RuntimeType {
+    type: "commandNode";
+    name: string;
+    description: string;
+    command: Command;
+}
+
+export interface SubcommandNode extends RuntimeType {
+    type: "subcommandNode";
+    name: string;
+    description: string;
+    children: Map<string, CommandNode>;
+}
+
+export interface SubcommandGroupNode extends RuntimeType {
+    type: "subcommandGroupNode";
+    name: string;
+    description: string;
+    children: Map<string, SubcommandNode>;
+}
+
+export type SlashCommand = CommandNode | SubcommandNode | SubcommandGroupNode;
+
+export class CommandRegistry {
+    private readonly commands: Map<string, SlashCommand> = new Map();
     private locked: boolean = false;
 
-    public registerCommand(name: string, commandFactory: Func<Command>): CommandRegistry {
+    get slashCommands(): Iterable<[string, SlashCommand]> {
+        return this.commands.entries();
+    }
+
+    registerSlashCommand(slashCommandRegistration: SlashCommandRegistration): CommandRegistry {
         if (this.locked)
             throw new Error("Command registry is locked!");
-        this.commands.set(name, commandFactory());
+        
+        const slashCommand = this.buildSlashCommand(slashCommandRegistration);
+        this.commands.set(slashCommand.name, slashCommand);
+
         return this;
     }
 
-    public lock(): CommandRegistry {
+    private buildSlashCommand(slashCommandRegistration: SlashCommandRegistration): SlashCommand {
+        if (slashCommandRegistration.type === "commandRegistration")
+            return this.buildCommandNode(slashCommandRegistration);
+        if (slashCommandRegistration.type === "subcommandRegistration")
+            return this.buildSubcommandNode(slashCommandRegistration);
+        if (slashCommandRegistration.type === "subcommandGroupRegistration")
+            return this.buildSubcommandGroupNode(slashCommandRegistration);
+
+        throw Error("Unknown slash command registration type!");
+    }
+
+    private buildCommandNode(slashCommandRegistration: CommandRegistration): CommandNode {
+        return {
+            type: "commandNode",
+            name: slashCommandRegistration.name,
+            description: slashCommandRegistration.description,
+            command: slashCommandRegistration.command()
+        }
+    }
+
+    private buildSubcommandNode(slashCommandRegistration: SubcommandRegistration): SubcommandNode {
+        return {
+            type: "subcommandNode",
+            name: slashCommandRegistration.name,
+            description: slashCommandRegistration.description,
+            children: new Map(slashCommandRegistration.children.map(child => [child.name, this.buildCommandNode(child)]))
+        }
+    }
+
+    private buildSubcommandGroupNode(slashCommandRegistration: SubcommandGroupRegistration): SubcommandGroupNode {
+        return {
+            type: "subcommandGroupNode",
+            name: slashCommandRegistration.name,
+            description: slashCommandRegistration.description,
+            children: new Map(slashCommandRegistration.children.map(child => [child.name, this.buildSubcommandNode(child)]))
+        }
+    }
+
+    lock(): CommandRegistry {
         this.locked = true;
         return this;
     }
 
-    public count(): number {
-        return this.commands.size;
+    count(): number {
+        let count = 0;
+        for (const command of this.commands.values())
+            count += this.countSlashCommand(command);
+        return count;
     }
 
-    public getCommand(name: string): Command | undefined {
-        return this.commands.get(name);
+    private countSlashCommand(node: SlashCommand): number {
+        if (node.type === "commandNode")
+            return 1;
+        if (node.type === "subcommandNode")
+            return this.countSubcommandNode(node);
+        if (node.type === "subcommandGroupNode")
+            return this.countSubcommandGroupNode(node);
+
+        throw new Error("Unknown slash command node type!");
     }
 
-    [Symbol.iterator](): Iterator<[string, Command]> {
-        return this.commands.entries();   
+    countSubcommandNode(node: SubcommandNode): number {
+        let count = 0;
+        for (const child of node.children.values())
+            count += this.countSlashCommand(child);
+        return count;
     }
 
+    countSubcommandGroupNode(node: SubcommandGroupNode): number {
+        let count = 0;
+        for (const child of node.children.values())
+            count += this.countSlashCommand(child);
+        return count;
+    }
+
+    getCommand(name: string[]): Command | null {
+        if (name.length === 0)
+            return null;
+        const head = name[0];
+        const node = this.commands.get(head);
+        if (!node)
+            return null;
+        return this.getSlashCommand(node, name.slice(1));
+    }
+
+    private getSlashCommand(node: SlashCommand, name: string[]): Command | null {
+        if (node.type === "commandNode")
+            return this.getCommandNode(node);
+        if (node.type === "subcommandNode")
+            return this.getSubcommandNode(node, name);
+        if (node.type === "subcommandGroupNode")
+            return this.getSubcommandGroupNode(node, name);
+        return null;
+    }
+
+    private getCommandNode(node: CommandNode): Command | null {
+        return node.command;
+    }
+
+    private getSubcommandNode(node: SubcommandNode, name: string[]): Command | null {
+        const head = name[0];
+        if (!node.children.has(head))
+            return null;
+        const child = node.children.get(head);
+        if (!child)
+            return null;
+        return this.getSlashCommand(child, name.slice(1));
+    }
+
+    private getSubcommandGroupNode(node: SubcommandGroupNode, name: string[]): Command | null {
+        const head = name[0];
+        if (!node.children.has(head))
+            return null;
+        const child = node.children.get(head);
+        if (!child)
+            return null;
+        return this.getSlashCommand(child, name.slice(1));
+    }
 }

@@ -10,7 +10,8 @@ import { CommandHandler } from "./core";
 
 // Commands
 import { Ping, Authorize } from "./core/command";
-import { AuthService } from "./service";
+import { AuthService, DatabaseService } from "./service";
+import { GetCalendars } from "./core/command/GetCalendars";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -22,13 +23,39 @@ const client = new Client({
     ]
 });
 
-const authService = new AuthService(logger.child({ component: "AuthService" }), startup);
+const databaseService = new DatabaseService();
+const authService = new AuthService(logger.child({ component: "AuthService" }), databaseService, startup);
 const commandHandler = new CommandHandler(
     logger.child({ component: "CommandHandler" }),
-    function* () {
-        yield ["ping", () => new Ping()];
-        yield ["authorize", () => new Authorize(authService)];
-    });
+    [
+        {
+            type: "commandRegistration",
+            name: "ping",
+            description: "Ping the bot",
+            command: () => new Ping()
+        },
+        {
+            type: "commandRegistration",
+            name: "authorize",
+            description: "Authorize the bot to access your Google Calendar",
+            command: () => new Authorize(authService),
+        },
+        {
+            type: "subcommandRegistration",
+            name: "calendar",
+            description: "Manage your calendars",
+            children: [
+                {
+                    type: "commandRegistration",
+                    name: "get",
+                    description: "Get your calendars",
+                    command: () => new GetCalendars(authService, databaseService)
+                }
+            ]
+        }
+    ]
+);
+
 commandHandler.subscribeEvents(client);
 
 client.on("ready", (client) => {
