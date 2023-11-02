@@ -1,9 +1,9 @@
-import { ChatInputCommandInteraction, CacheType, EmbedBuilder } from "discord.js";
-import { Command } from "..";
+import { ModalSubmitInteraction, CacheType } from "discord.js";
+import { ModalHandler } from "..";
 import { AuthService, DatabaseService } from "../../service";
 import { google } from "googleapis";
 
-export class ListCalendar implements Command {
+export class UseCalendarModalHandler implements ModalHandler {
     private readonly authService: AuthService;
     private readonly databaseService: DatabaseService;
 
@@ -12,9 +12,10 @@ export class ListCalendar implements Command {
         this.databaseService = databaseService;
     }
 
-    async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
+    async execute(interaction: ModalSubmitInteraction<CacheType>): Promise<void> {
         const user = await this.databaseService.getUser(interaction.user.id);
         if (!user) {
+            // This shouldn't ever happen, but just in case
             await interaction.reply({
                 ephemeral: true,
                 content: "You were not authorized! Please authorize me by using the `/authorize` command."
@@ -25,7 +26,6 @@ export class ListCalendar implements Command {
         await interaction.deferReply({
             ephemeral: true
         }); // In case fetching from Google Calendar takes a while
-
         const oauth2Client = this.authService.getOauth2Client(user.googleRefreshToken);
         const calendar = google.calendar({ 
             version: "v3", 
@@ -33,23 +33,17 @@ export class ListCalendar implements Command {
         });
         const response = await calendar.calendarList.list();
         const calendars = response.data.items;
-        if (!calendars) {
+        const calendarId = interaction.fields.getTextInputValue("calendarIdInput");
+        const selectedCalendar = calendars?.find(calendar => calendar.id === calendarId);
+        if (!selectedCalendar) {
             await interaction.editReply({
-                content: "You don't have any calendars!"
+                content: `The calendar with ID \`${calendarId}\` does not exist!`
             });
             return;
         }
-        const embed = new EmbedBuilder()
-            .setColor(0x5dff5d)
-            .setTitle("Provided by Google Calendar")
-            .setAuthor({
-                name: interaction.user.username,
-                iconURL: interaction.user.avatarURL()!
-            })
-            .setDescription(calendars.map(calendar => `- ${calendar.summary} // id: \`${calendar.id}\``).join("\n"));
+        await this.databaseService.updateUserCalendar(interaction.user.id, selectedCalendar.id!);
         await interaction.editReply({
-            content: "Here are your calendars",
-            embeds: [embed]
+            content: `✅ Successfully set your calendar to \`${selectedCalendar.summary}\`!\nYou will now receive notifications from this calendar.`
         });
     }
 }

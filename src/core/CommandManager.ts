@@ -27,7 +27,7 @@ export interface SubcommandGroupRegistration extends RuntimeType {
 
 export type SlashCommandRegistration = CommandRegistration | SubcommandRegistration | SubcommandGroupRegistration;
 
-export class CommandHandler {
+export class CommandManager {
     private readonly logger: Logger;
     private readonly commandRegistry: CommandRegistry;
 
@@ -39,29 +39,21 @@ export class CommandHandler {
         this.commandRegistry.lock();
     }
 
-    public subscribeEvents(client: Client): void {
+    subscribeEvents(client: Client) {
         client.on(Events.ClientReady, () => {
-            const commands = [...CommandHandler.iterateCommandData(this.commandRegistry)];
+            const commands = [...CommandManager.iterateCommandData(this.commandRegistry)];
             const application = client.application;
             if (!application)
                 throw new Error("Application is not initialized!");
-            
             application.commands.set(commands);
-
             this.logger.info(`Registered ${this.commandRegistry.count()} slash commands`);
         });
 
         client.on(Events.InteractionCreate, async (interaction) => {
-            if (!this.commandRegistry)
-                throw new Error("Command registry is not initialized!");
-
-            if (!interaction.isCommand())
+            if (!interaction.isChatInputCommand())
                 return;
 
-            if (!(interaction instanceof ChatInputCommandInteraction))
-                return;
-
-            const commandName = CommandHandler.getCommandName(interaction);
+            const commandName = CommandManager.getCommandName(interaction);
             const command = this.commandRegistry.getCommand(commandName);
             if (!command) {
                 await interaction.reply("Error: Command not found!");

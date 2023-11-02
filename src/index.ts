@@ -6,12 +6,13 @@ import { Client, Events, IntentsBitField } from "discord.js";
 import { pino } from "pino";
 import pretty from "pino-pretty";
 import { createStartupInfoFromEnvironment } from "./util";
-import { CommandHandler } from "./core";
+import { CommandManager, ModalHandlerManager } from "./core";
 
 // Commands
 import { Ping, Authorize, ListCalendar } from "./core/command";
 import { AuthService, DatabaseService } from "./service";
 import { UseCalendar } from "./core/command/UseCalendar";
+import { UseCalendarModalHandler } from "./core/modalHandler";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -25,8 +26,9 @@ const client = new Client({
 
 const databaseService = new DatabaseService();
 const authService = new AuthService(logger.child({ component: "AuthService" }), databaseService, startup);
-const commandHandler = new CommandHandler(
-    logger.child({ component: "CommandHandler" }),
+
+const commandManager = new CommandManager(
+    logger.child({ component: "CommandManager" }),
     [
         {
             type: "commandRegistration",
@@ -61,8 +63,18 @@ const commandHandler = new CommandHandler(
         }
     ]
 );
+const modalHandlerManager = new ModalHandlerManager(
+    logger.child({ component: "ModalHandlerManager" }),
+    [
+        {
+            name: "useCalendarModal",
+            modalHandler: () => new UseCalendarModalHandler(authService, databaseService)
+        }
+    ]
+);
 
-commandHandler.subscribeEvents(client);
+commandManager.subscribeEvents(client);
+modalHandlerManager.subscribeEvents(client);
 
 client.on(Events.ClientReady, (client) => {
     logger.info(`Logged in as '${client.user?.tag}' (ID: ${client.user?.id})`);

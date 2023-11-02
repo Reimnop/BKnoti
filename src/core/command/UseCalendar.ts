@@ -25,37 +25,12 @@ export class UseCalendar implements Command {
             .setCustomId("useCalendarModal")
             .setTitle("Use Calendar");
         const calendarInput = new TextInputBuilder()
-            .setCustomId("calendarInput")
-            .setLabel("Which calendar do you want to use?")
+            .setCustomId("calendarIdInput")
+            .setLabel("Enter the calendar ID (use `/calendar list`)")
             .setStyle(TextInputStyle.Short);
         const calendarInputActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>()
             .addComponents(calendarInput);
         modal.addComponents(calendarInputActionRow);
         await interaction.showModal(modal);
-
-        const awaitSubmitFilter = (interaction: ModalSubmitInteraction) => interaction.customId === "useCalendarModal";
-        const modalInteraction = await interaction.awaitModalSubmit({ filter: awaitSubmitFilter, time: 30000 }); // 30 seconds
-        await modalInteraction.deferReply({
-            ephemeral: true
-        }); // In case fetching from Google Calendar takes a while
-        const oauth2Client = this.authService.getOauth2Client(user.googleRefreshToken);
-        const calendar = google.calendar({ 
-            version: "v3", 
-            auth: oauth2Client 
-        });
-        const response = await calendar.calendarList.list();
-        const calendars = response.data.items;
-        const calendarName = modalInteraction.fields.getTextInputValue("calendarInput");
-        const selectedCalendar = calendars?.find(calendar => calendar.summary === calendarName);
-        if (!selectedCalendar) {
-            await modalInteraction.editReply({
-                content: `The calendar \`${calendarName}\` does not exist!`
-            });
-            return;
-        }
-        await this.databaseService.updateUserCalendar(interaction.user.id, selectedCalendar.id!);
-        await modalInteraction.editReply({
-            content: `✅ Successfully set calendar to \`${selectedCalendar.summary}\`!`
-        });
     }
 }
