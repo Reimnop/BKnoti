@@ -15,9 +15,14 @@ export class DatabaseService {
 
     async getUser(discordId: string): Promise<User | null> {
         return await this.prisma.user.findUnique({
-            where: {
-                discordId: discordId
-            }
+            where: { discordId }
+        });
+    }
+
+    async updateUserCalendar(discordId: string, calendar: string) {
+        await this.prisma.user.update({
+            where: { discordId },
+            data: { calendar }
         });
     }
 }

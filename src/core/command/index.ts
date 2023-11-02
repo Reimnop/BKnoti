@@ -1,3 +1,4 @@
 export * from "./Authorize";
 export * from "./Ping";
-export * from "./SetSchedule";
+export * from "./ListCalendar";
+export * from "./UseCalendar";

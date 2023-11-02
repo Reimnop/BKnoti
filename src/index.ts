@@ -2,16 +2,16 @@
 import "dotenv/config";
 
 // Imports
-import { Client, IntentsBitField } from "discord.js";
+import { Client, Events, IntentsBitField } from "discord.js";
 import { pino } from "pino";
 import pretty from "pino-pretty";
 import { createStartupInfoFromEnvironment } from "./util";
 import { CommandHandler } from "./core";
 
 // Commands
-import { Ping, Authorize } from "./core/command";
+import { Ping, Authorize, ListCalendar } from "./core/command";
 import { AuthService, DatabaseService } from "./service";
-import { GetCalendars } from "./core/command/GetCalendars";
+import { UseCalendar } from "./core/command/UseCalendar";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -47,9 +47,15 @@ const commandHandler = new CommandHandler(
             children: [
                 {
                     type: "commandRegistration",
-                    name: "get",
-                    description: "Get your calendars",
-                    command: () => new GetCalendars(authService, databaseService)
+                    name: "list",
+                    description: "List all of your calendars",
+                    command: () => new ListCalendar(authService, databaseService)
+                },
+                {
+                    type: "commandRegistration",
+                    name: "use",
+                    description: "Set a calendar for the bot to use",
+                    command: () => new UseCalendar(authService, databaseService)
                 }
             ]
         }
@@ -58,7 +64,7 @@ const commandHandler = new CommandHandler(
 
 commandHandler.subscribeEvents(client);
 
-client.on("ready", (client) => {
+client.on(Events.ClientReady, (client) => {
     logger.info(`Logged in as '${client.user?.tag}' (ID: ${client.user?.id})`);
 });
 

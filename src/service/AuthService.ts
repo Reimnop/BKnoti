@@ -79,12 +79,18 @@ export class AuthService {
         return true;
     }
 
-    getOauth2Client(): OAuth2Client {
-        return new google.auth.OAuth2(
+    getOauth2Client(refreshToken?: string): OAuth2Client {
+        const client = new google.auth.OAuth2(
             this.startupInfo.googleApiClientId,
             this.startupInfo.googleApiClientSecret,
             this.startupInfo.googleApiRedirectUri
         );
+        if (refreshToken) {
+            client.setCredentials({
+                refresh_token: refreshToken
+            });
+        }
+        return client;
     }
 
     getAuthUrl(userId: string): string {

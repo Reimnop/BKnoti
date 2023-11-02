@@ -1,4 +1,4 @@
-import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder } from "discord.js";
+import { Client, SlashCommandBuilder, ChatInputCommandInteraction, RESTPostAPIChatInputApplicationCommandsJSONBody, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, Events } from "discord.js";
 import { Logger } from "pino";
 import { CommandNode, CommandRegistry, SlashCommand, SubcommandGroupNode, SubcommandNode } from "./CommandRegistry";
 import { Func, RuntimeType } from "../util";
@@ -40,7 +40,7 @@ export class CommandHandler {
     }
 
     public subscribeEvents(client: Client): void {
-        client.on("ready", () => {
+        client.on(Events.ClientReady, () => {
             const commands = [...CommandHandler.iterateCommandData(this.commandRegistry)];
             const application = client.application;
             if (!application)
@@ -51,7 +51,7 @@ export class CommandHandler {
             this.logger.info(`Registered ${this.commandRegistry.count()} slash commands`);
         });
 
-        client.on("interactionCreate", async (interaction) => {
+        client.on(Events.InteractionCreate, async (interaction) => {
             if (!this.commandRegistry)
                 throw new Error("Command registry is not initialized!");
 
