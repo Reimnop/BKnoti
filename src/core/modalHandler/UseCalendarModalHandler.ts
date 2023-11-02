@@ -43,7 +43,7 @@ export class UseCalendarModalHandler implements ModalHandler {
         }
         await this.databaseService.updateUserCalendar(interaction.user.id, selectedCalendar.id!);
         await interaction.editReply({
-            content: `✅ Successfully set your calendar to \`${selectedCalendar.summary}\`!\nYou will now receive notifications from this calendar.`
+            content: `✅ The calendar has been successfully set to \`${selectedCalendar.summary}\`!\nYou will now receive notifications from this calendar.`
         });
     }
 }
