@@ -13,6 +13,7 @@ import { Ping, Authorize, ListCalendar } from "./core/command";
 import { AuthService, DatabaseService } from "./service";
 import { UseCalendar } from "./core/command/UseCalendar";
 import { UseCalendarModalHandler } from "./core/modalHandler";
+import { Help } from "./core/command/Help";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -28,7 +29,7 @@ const databaseService = new DatabaseService();
 const authService = new AuthService(logger.child({ component: "AuthService" }), databaseService, startup);
 
 const commandManager = new CommandManager(
-    logger.child({ component: "CommandManager" }),
+    logger.child({ component: "CommandManager" }), 
     [
         {
             type: "commandRegistration",
@@ -40,7 +41,7 @@ const commandManager = new CommandManager(
             type: "commandRegistration",
             name: "authorize",
             description: "Authorize the bot to access your Google Calendar",
-            command: () => new Authorize(authService),
+            command: () => new Authorize(authService, databaseService), 
         },
         {
             type: "subcommandRegistration",
@@ -63,6 +64,20 @@ const commandManager = new CommandManager(
         }
     ]
 );
+
+// Since the Help command needs a reference to the CommandManager, we need to register it after the CommandManager is initialized
+commandManager.registerAdditionalCommands([
+    {
+        type: "commandRegistration",
+        name: "help",
+        description: "Show the help menu",
+        command: () => new Help(commandManager)
+    }
+]);
+
+// Lock the CommandRegistry so that no more commands can be registered
+commandManager.lock();
+
 const modalHandlerManager = new ModalHandlerManager(
     logger.child({ component: "ModalHandlerManager" }),
     [

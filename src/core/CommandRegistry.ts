@@ -1,3 +1,4 @@
+import fluent from "fluent-iterable";
 import { CommandRegistration, SlashCommandRegistration, SubcommandGroupRegistration, SubcommandRegistration } from ".";
 import { RuntimeType } from "../util";
 import { Command } from "./Command";
@@ -31,6 +32,30 @@ export class CommandRegistry {
 
     get slashCommands(): Iterable<[string, SlashCommand]> {
         return this.commands.entries();
+    }
+
+    get leafCommands(): Iterable<{ name: string[], description: string, command: Command }> {
+        return fluent(this.commands.entries())
+            .flatten(([name, slashCommand]) => CommandRegistry.iterateCommandNode([], slashCommand))
+            .map(({ name, node }) => ({
+                name,
+                description: node.description,
+                command: node.command
+            }));
+    }
+
+    private static *iterateCommandNode(parentName: string[], slashCommand: SlashCommand): Generator<{ name: string[], node: CommandNode}> {
+        const currentName = [...parentName, slashCommand.name];
+        if (slashCommand.type === "commandNode") {
+            yield {
+                name: currentName,
+                node: slashCommand
+            };
+        } else {
+            const children = slashCommand.children.values();
+            for (const child of children)
+                yield* CommandRegistry.iterateCommandNode(currentName, child);
+        }
     }
 
     registerSlashCommand(slashCommandRegistration: SlashCommandRegistration): CommandRegistry {

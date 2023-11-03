@@ -28,14 +28,22 @@ export interface SubcommandGroupRegistration extends RuntimeType {
 export type SlashCommandRegistration = CommandRegistration | SubcommandRegistration | SubcommandGroupRegistration;
 
 export class CommandManager {
+    public readonly commandRegistry: CommandRegistry;
     private readonly logger: Logger;
-    private readonly commandRegistry: CommandRegistry;
 
     constructor(logger: Logger, slashCommandRegistrations: SlashCommandRegistration[]) {
         this.logger = logger;
         this.commandRegistry = new CommandRegistry();
         for (const registration of slashCommandRegistrations)
             this.commandRegistry.registerSlashCommand(registration);
+    }
+
+    registerAdditionalCommands(slashCommandRegistrations: SlashCommandRegistration[]) {
+        for (const registration of slashCommandRegistrations)
+            this.commandRegistry.registerSlashCommand(registration);
+    }
+
+    lock() {
         this.commandRegistry.lock();
     }
 

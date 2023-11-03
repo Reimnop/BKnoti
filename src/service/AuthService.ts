@@ -33,7 +33,7 @@ export class AuthService {
         this.expressApp = this.initExpress();
         this.expressApp.listen(startupInfo.redirectPort);
     }
-
+    
     private initExpress(): Express {
         const app = express();
         app.get("/authenticate", async (request, response) => {
