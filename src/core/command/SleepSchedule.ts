@@ -36,13 +36,13 @@ export class SleepSchedule implements Command {
             auth: oauth2Client
         });
         const now = DateTime.now();
-        const nextWeek = now.plus({ weeks: 1 });
+        const nextWeek = now.plus({ weeks: 1 })
         const calendarEventsResponse = await calendarClient.events.list({
             calendarId: user.calendar,
             orderBy: "startTime",
             singleEvents: true,
-            timeMin: now.toISO(),
-            timeMax: nextWeek.toISO()
+            timeMin: now.toISO()!,
+            timeMax: nextWeek.toISO()!
         });
         if (calendarEventsResponse.status !== 200) {
             await interaction.editReply({
