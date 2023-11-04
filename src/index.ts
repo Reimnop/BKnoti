@@ -72,7 +72,7 @@ const commandManager = new CommandManager(
                     type: "commandRegistration",
                     name: "schedule",
                     description: "Schedules your sleep pattern",
-                    command: () => new SleepSchedule(databaseService)
+                    command: () => new SleepSchedule(authService, databaseService)
                 }
             ]
         }

@@ -1,6 +1,8 @@
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { Command } from "..";
 import { AuthService, DatabaseService } from "../../service";
+import { google } from "googleapis";
+import moment from "moment";
 
 export class SleepSchedule implements Command {
     private readonly authService: AuthService;
@@ -22,6 +24,40 @@ export class SleepSchedule implements Command {
             });
             return;
         }
-        const oauth2Client = this.authService.getOAuth2Client(user);
+        if (!user.calendar) {
+            await interaction.editReply({
+                content: "You have not set a calendar! Please set a calendar by using the `/calendar use` command."
+            });
+            return;
+        }
+        const oauth2Client = this.authService.getOAuth2Client(user.googleRefreshToken);
+        const calendarClient = google.calendar({
+            version: "v3",
+            auth: oauth2Client
+        })
+        const now = moment();
+        const nextWeek = moment(now).add(1, "week");
+        const calendarEventsResponse = await calendarClient.events.list({
+            calendarId: user.calendar,
+            orderBy: "startTime",
+            singleEvents: true,
+            timeMin: now.toISOString(),
+            timeMax: nextWeek.toISOString()
+        });
+        if (calendarEventsResponse.status !== 200) {
+            await interaction.editReply({
+                content: "An error occurred while fetching your calendar!"
+            });
+            return;
+        }
+        const events = calendarEventsResponse.data;
+        await interaction.editReply({
+            files: [
+                {
+                    attachment: Buffer.from(JSON.stringify(events, null, 2)),
+                    name: "calendar.json"
+                }
+            ]
+        });
     }
 }
