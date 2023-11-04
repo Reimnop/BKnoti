@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { Command } from "..";
 import { AuthService, DatabaseService } from "../../service";
 import { google } from "googleapis";
-import moment from "moment";
+import { DateTime } from "luxon";
 
 export class SleepSchedule implements Command {
     private readonly authService: AuthService;
@@ -34,15 +34,15 @@ export class SleepSchedule implements Command {
         const calendarClient = google.calendar({
             version: "v3",
             auth: oauth2Client
-        })
-        const now = moment();
-        const nextWeek = moment(now).add(1, "week");
+        });
+        const now = DateTime.now();
+        const nextWeek = now.plus({ weeks: 1 });
         const calendarEventsResponse = await calendarClient.events.list({
             calendarId: user.calendar,
             orderBy: "startTime",
             singleEvents: true,
-            timeMin: now.toISOString(),
-            timeMax: nextWeek.toISOString()
+            timeMin: now.toISO(),
+            timeMax: nextWeek.toISO()
         });
         if (calendarEventsResponse.status !== 200) {
             await interaction.editReply({
