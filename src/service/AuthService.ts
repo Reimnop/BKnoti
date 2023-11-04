@@ -79,7 +79,7 @@ export class AuthService {
         return true;
     }
 
-    getOauth2Client(refreshToken?: string): OAuth2Client {
+    getOAuth2Client(refreshToken?: string): OAuth2Client {
         const client = new google.auth.OAuth2(
             this.startupInfo.googleApiClientId,
             this.startupInfo.googleApiClientSecret,
@@ -96,7 +96,7 @@ export class AuthService {
     getAuthUrl(userId: string): string {
         // We request Google for an authorization URL
         // and return it to the user.
-        const oauth2Client = this.getOauth2Client();
+        const oauth2Client = this.getOAuth2Client();
         const scopes = [
             "https://www.googleapis.com/auth/calendar.readonly"
         ];

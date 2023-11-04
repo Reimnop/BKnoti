@@ -26,7 +26,7 @@ export class ListCalendar implements Command {
             ephemeral: true
         }); // In case fetching from Google Calendar takes a while
 
-        const oauth2Client = this.authService.getOauth2Client(user.googleRefreshToken);
+        const oauth2Client = this.authService.getOAuth2Client(user.googleRefreshToken);
         const calendar = google.calendar({ 
             version: "v3", 
             auth: oauth2Client 

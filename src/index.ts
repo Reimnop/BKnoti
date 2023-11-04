@@ -14,6 +14,7 @@ import { AuthService, DatabaseService } from "./service";
 import { UseCalendar } from "./core/command/UseCalendar";
 import { UseCalendarModalHandler } from "./core/modalHandler";
 import { Help } from "./core/command/Help";
+import { SleepSchedule } from "./core/command/SleepSchedule";
 
 const logger = pino(pretty());
 const startup = createStartupInfoFromEnvironment();
@@ -59,6 +60,19 @@ const commandManager = new CommandManager(
                     name: "use",
                     description: "Set a calendar for the bot to use",
                     command: () => new UseCalendar(authService, databaseService)
+                }
+            ]
+        },
+        {
+            type: "subcommandRegistration",
+            name: "sleep",
+            description: "Manage your sleep schedule",
+            children: [
+                {
+                    type: "commandRegistration",
+                    name: "schedule",
+                    description: "Schedules your sleep pattern",
+                    command: () => new SleepSchedule(databaseService)
                 }
             ]
         }
