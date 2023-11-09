@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, CacheType, EmbedBuilder } from "discord.js
 import { Command } from "..";
 import { AuthService, DatabaseService } from "../../service";
 import { google } from "googleapis";
+import { NOT_AUTHORIZED, NO_CALENDAR } from "../../util";
 
 export class ListCalendar implements Command {
     private readonly authService: AuthService;
@@ -17,7 +18,7 @@ export class ListCalendar implements Command {
         if (!user) {
             await interaction.reply({
                 ephemeral: true,
-                content: "You were not authorized! Please authorize me by using the `/authorize` command."
+                content: NOT_AUTHORIZED
             });
             return;
         }
@@ -35,7 +36,7 @@ export class ListCalendar implements Command {
         const calendars = response.data.items;
         if (!calendars) {
             await interaction.editReply({
-                content: "You don't have any calendars!"
+                content: NO_CALENDAR
             });
             return;
         }

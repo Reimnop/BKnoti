@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, CacheType } from "discord.js";
 import { Command } from "..";
 import { AuthService, DatabaseService } from "../../service";
+import { ALREADY_AUTHORIZED } from "../../util";
 
 export class Authorize implements Command {
     private readonly authService: AuthService;
@@ -17,9 +18,7 @@ export class Authorize implements Command {
         });
         const user = await this.databaseService.getUser(interaction.user.id);
         if (user) {
-            await interaction.editReply({
-                content: "You are already authorized!"
-            });
+            await interaction.editReply(ALREADY_AUTHORIZED);
             return;
         }
         const url = this.authService.getAuthUrl(interaction.user.id);
