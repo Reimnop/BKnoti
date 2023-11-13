@@ -85,10 +85,10 @@ export class SleepSchedule implements Command {
         // Get first event
         const firstEvent = events.items?.[0];
         const firstEventStart = firstEvent ? DateTime.fromISO(firstEvent.start?.dateTime!).setZone(timezone) : undefined;
-        if (firstEventStart && firstEventStart.hour < 9) {
+        if (firstEventStart && firstEventStart.hour <= 8) {
             return firstEventStart.minus({ hours: 1 });
         }
-        return day.plus({ hours: 9 });
+        return day.plus({ hours: 8 });
     }
 
     // Calculate sleep time based on sleep cycles
