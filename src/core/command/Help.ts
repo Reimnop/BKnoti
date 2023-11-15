@@ -11,14 +11,22 @@ export class Help implements Command {
 
     async execute(interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
         const commands = fluent(this.commandManager.commandRegistry.leafCommands);
+        const embedDescription = 
+`**For first time users**\n
+1. Import your calendar using [BKalendar](https://bkalendar.github.io/) into your Google Calendar.
+2. Authorize the bot to access your Google Calendar using \`/authorize\`.
+3. List your calendars using \`/calendar list\`.
+4. Select the calendar you want to use using \`/calendar use\`.
+
+**Available commands**\n
+${commands.map(command => `\`/${command.name.join(" ")}\` - ${command.description}`).join("\n")}`;
         const embed = new EmbedBuilder()
             .setColor(0x5dff5d)
-            .setTitle("List of Commands")
             .setAuthor({
                 name: interaction.user.username,
                 iconURL: interaction.user.avatarURL()!
             })
-            .setDescription(commands.map(command => `\`/${command.name.join(" ")}\` - ${command.description}`).join("\n"));
+            .setDescription(embedDescription);
         await interaction.reply({
             embeds: [embed]
         });
